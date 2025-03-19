@@ -2,14 +2,11 @@ from flask import Blueprint, jsonify, request
 from app.schemas import user_schema
 from app.models import User, db
 from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 
 user_bp = Blueprint('user', __name__, url_prefix='/api/user')
 
-from flask import request, jsonify
-from werkzeug.security import generate_password_hash
-from app.models import User, db  # Ensure correct imports
-from flask_jwt_extended import create_access_token
 
 @user_bp.route('/register', methods=['POST'])
 def register():
@@ -59,13 +56,50 @@ def login():
 
     # Find user by email
     user = User.query.filter_by(email=data['email']).first()
-    if not user or not user.check_password(data['password']):  # Ensure method exists
-        return jsonify({'error': 'Invalid email or password'}), 401
+    if not user :  # Ensure user exists
+        return jsonify({'error': 'User not found. Kindly register.'}), 401
+    
+    if not user.check_password(data['password']):
+        return jsonify({'error': 'Incorrect password.'}), 401
 
     # Generate JWT token
     access_token = create_access_token(identity=str(user.id))
 
     return jsonify({
         'message': 'Login successful',
-        'access_token': access_token
+        'access_token': access_token,
+        'user': user_schema.dump(user)
     }), 200
+
+# Fetch all user data
+@user_bp.route('/<int:id>', methods=['GET'])
+@jwt_required()
+def get_user(id):
+    user = User.query.get_or_404(id)
+    return jsonify(user_schema.dump(user)), 200
+
+# Update user details (email, username, password)
+@user_bp.route('/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_user(id):
+    user = User.query.get_or_404(id)
+    data = request.get_json()
+
+    if 'username' in data:
+        # Check if the new username already exists for another user
+        if User.query.filter(User.username == data['username'], User.id != id).first():
+            return jsonify({'error': 'Username already exists'}), 400
+        user.username = data['username']
+
+    if 'email' in data:
+        # Check if the new email already exists for another user
+        if User.query.filter(User.email == data['email'], User.id != id).first():
+            return jsonify({'error': 'Email already exists'}), 400
+        user.email = data['email']
+
+    if 'password' in data:
+        user.set_password(data['password'])  # Hash new password
+
+    db.session.commit()
+
+    return jsonify({'message': 'User updated successfully', 'user': user_schema.dump(user)}), 200

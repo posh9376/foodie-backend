@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.schemas import food_schema, foods_schema
 from app.models import Food, db
+from sqlalchemy.sql.expression import func
 
 
 foods_bp = Blueprint('foods',__name__,url_prefix='/api/foods')
@@ -17,14 +18,17 @@ def get_food(id):
     food = Food.query.get_or_404(id)
     return jsonify(food_schema.dump(food))
 
-#Get foods wth a specific category
-@foods_bp.route('/<category>', methods=['GET'])
-def get_category_foods(category):
-    foods = Food.query.filter_by(category = category).all()
-    if not foods:
-        return jsonify({'message':'NO recipes found in that category'}),404
-    
-    return jsonify(foods_schema.dump(foods)), 200
+# Get 4 random popular recipes
+@foods_bp.route('/popular', methods=['GET'])
+def get_popular_foods():
+    try:
+        # Fetch 4 random recipes
+        popular_foods = Food.query.order_by(func.random()).limit(4).all()
+        return jsonify(foods_schema.dump(popular_foods)), 200
+    except Exception as e:
+        print(f"Error fetching popular recipes: {e}")
+        return jsonify({'error': 'Unable to fetch popular recipes'}), 500
+
 
 #create a new food recipe
 @foods_bp.route('/', methods=['POST'])
@@ -86,6 +90,13 @@ def delete_recipe(id):
 
     return jsonify({'message': 'Recipe deleted successfully'}), 200
 
+# Fetch foods by category
+@foods_bp.route('/category/<string:category>', methods=['GET'])
+def get_foods_by_category(category):
+    foods = Food.query.filter_by(category=category).all()
+    if not foods:
+        return jsonify({'message': 'No foods found in this category'}), 404
+    return jsonify(foods_schema.dump(foods)), 200
 
 #search for foods according to the ingedients
 @foods_bp.route('/search', methods=['POST'])

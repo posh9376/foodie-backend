@@ -6,6 +6,7 @@ class FoodSchema(Schema):
     category = fields.Str(required=True)
     ingredients = fields.List(fields.Str(), required=True)  # Validate list of strings
     instructions = fields.List(fields.Dict(), required=True)  # Validate list of steps in JSON format
+    image_url = fields.Str(required=True)
 
 
 

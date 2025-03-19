@@ -7,6 +7,11 @@ name = "pypi"
 flask-jwt-extended = "*"
 flask-cors = "*"
 flask-migrate = "*"
+psycopg2-binary = "*"
+flask-sqlalchemy = "*"
+marshmallow = "*"
+flask-bcrypt = "*"
+python-dotenv = "*"
 
 [dev-packages]
 flask = "*"
@@ -22,4 +27,4 @@ python-dotenv = "*"
 flask-cors = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3"
