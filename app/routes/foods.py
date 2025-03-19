@@ -51,7 +51,10 @@ def create_food():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500 # Return any database error
 
-    return jsonify(food_schema.dump(new_food)), 201
+    return jsonify({
+        'message': 'recipe added successfully',
+        'recipe': food_schema.dump(new_food)
+    }), 201
 
 #update a specific food recipe
 @foods_bp.route('/<int:id>', methods=['PUT'])
