@@ -7,6 +7,13 @@ class FoodSchema(Schema):
     ingredients = fields.List(fields.Str(), required=True)  # Validate list of strings
     instructions = fields.List(fields.Dict(), required=True)  # Validate list of steps in JSON format
     image_url = fields.Str(required=True)
+    user_id = fields.Int(required=True)
+    #getting the username from the db
+    username = fields.Method('get_username')
+
+    #define the method
+    def get_username(self, obj):
+        return obj.user.username if obj.user else None
 
 
 

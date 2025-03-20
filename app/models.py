@@ -10,8 +10,10 @@ class Food(db.Model):
     ingredients = db.Column(ARRAY(db.String), nullable=False)
     instructions = db.Column(JSONB, nullable=False)
     image_url =db.Column(db.String(1000), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
 
-
+    #relationship
+    user = db.relationship('User', back_populates = 'foods', lazy=True)
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -19,6 +21,9 @@ class User(db.Model):
     username = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
+
+    #relationship
+    foods = db.relationship('Food', back_populates = 'user',lazy =True)
 
     def set_password(self, password):
         """Hash and store the user's password"""

@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.schemas import food_schema, foods_schema
 from app.models import Food, db
 from sqlalchemy.sql.expression import func
-
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 foods_bp = Blueprint('foods',__name__,url_prefix='/api/foods')
 
@@ -32,11 +32,14 @@ def get_popular_foods():
 
 #create a new food recipe
 @foods_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_food():
     data = request.get_json()
+    current_user = get_jwt_identity()
     
     if not data:
         return jsonify({'message':'No data provided'}), 400
+    data['user_id'] = current_user
     
     #validte data using schema
     errors = food_schema.validate(data)
