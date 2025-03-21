@@ -38,9 +38,13 @@ def create_app():
     #importing the bp inside the function to avoid circular imports
     from .routes.foods import foods_bp
     from .routes.user import user_bp
+    from .routes.coments import comments_bp
+    from .routes.likes import likes_bp
 
     #register the blueprints
     app.register_blueprint(user_bp)
     app.register_blueprint(foods_bp)
+    app.register_blueprint(comments_bp)
+    app.register_blueprint(likes_bp)
 
     return app

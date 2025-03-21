@@ -1,8 +1,8 @@
+from sqlalchemy.sql.expression import func
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import Blueprint, jsonify, request
 from app.schemas import food_schema, foods_schema
 from app.models import Food, db
-from sqlalchemy.sql.expression import func
-from flask_jwt_extended import jwt_required, get_jwt_identity
 
 foods_bp = Blueprint('foods',__name__,url_prefix='/api/foods')
 
